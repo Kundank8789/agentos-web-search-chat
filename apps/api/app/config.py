@@ -1,3 +1,4 @@
+
 from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -8,9 +9,11 @@ BASE_DIR = Path(__file__).resolve().parents[3]
 
 class Settings(BaseSettings):
     database_url: str
-
     groq_api_key: str
     groq_model: str = "openai/gpt-oss-20b"
+
+    # Tavily web search
+    tavily_api_key: str | None = None
 
     jwt_secret_key: str
     jwt_algorithm: str = "HS256"

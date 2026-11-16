@@ -16,6 +16,9 @@ from app.models.approval import Approval
 from app.models.audit_log import AuditLog
 from app.models.agent_alert import AgentAlert
 from app.models.alert_read import AlertRead
+from app.models.conversation import Conversation
+from app.models.chat_message import ChatMessage
+from app.models.memory import Memory
 
 config = context.config
 
