@@ -17,6 +17,7 @@ from app.api.analytics import router as analytics_router
 from app.api.alerts import router as alerts_router
 from app.api.websocket import router as websocket_router
 from app.services.notification_manager import notification_manager
+from app.api.chat import router as chat_router
 
 
 @asynccontextmanager
@@ -63,7 +64,7 @@ app.include_router(tool_calls_router)
 app.include_router(analytics_router)
 app.include_router(alerts_router)
 app.include_router(websocket_router)
-
+app.include_router(chat_router)
 
 @app.get("/health")
 async def health():
