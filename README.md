@@ -1,252 +1,306 @@
-# AgentOS — AI Employee for Indian Businesses
+# AgentOS — Web Search Chat Agent
 
-**An AI-powered business automation platform designed to help Indian businesses streamline workflows, manage operations, and reduce repetitive manual work.**
+An AI-powered conversational agent built with **FastAPI, Groq, and Tavily**. It answers user questions, searches the web when current information is needed, and remembers previous conversations using persistent database storage.
 
-[![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?logo=github)](https://github.com/Kundank8789/ai-agentOs)
-[![Python](https://img.shields.io/badge/Python-Backend-3776AB?logo=python&logoColor=white)](https://www.python.org/)
-[![AI Agents](https://img.shields.io/badge/AI-Agent%20Automation-8A2BE2)](https://github.com/Kundank8789/ai-agentOs)
+**Repository:** https://github.com/Kundank8789/agentos-web-search-chat
 
 ## Overview
 
-AgentOS is an AI employee platform built to help businesses automate everyday tasks through AI agents and modular business tools.
+This project extends AgentOS with a focused chat agent that can:
 
-The goal is to provide a unified system where users can interact with AI agents to perform business operations, manage workflows, and connect with external services through a structured API.
+- Understand and respond to natural-language questions.
+- Search the web using Tavily when up-to-date information is required.
+- Generate responses using Groq-hosted LLMs.
+- Maintain conversation context across multiple messages.
+- Persist conversations and messages in a database.
+- Return web sources alongside answers.
+- Authenticate users using the existing AgentOS authentication system.
 
-Rather than using AI only for conversations, AgentOS aims to make AI useful for executing real business tasks.
+The agent uses one external tool: **Tavily Web Search**. Conversation history is handled internally through database persistence.
 
 ## Key Features
 
-- **AI Agent Runtime:** A foundation for processing requests and coordinating agent execution.
-- **Modular Tool Architecture:** Organize business capabilities into reusable tools.
-- **Business Workflow Automation:** Build workflows that reduce repetitive manual operations.
-- **API Backend:** Provide endpoints for interacting with the agent system.
-- **CRM Integration:** A foundation for automating customer and lead management workflows.
-- **Gmail Integration:** A foundation for email-related automation, subject to configuration and implemented capabilities.
-- **Extensible Architecture:** Add new tools and integrations as the platform evolves.
-- **Web Application:** A dedicated frontend for interacting with the platform.
+### 1. AI-powered conversations
+Uses the Groq API with an OpenAI-compatible client to generate conversational responses.
 
-*Note: The project is under active development. Feature availability depends on the current implementation and external service configuration.*
+### 2. Web search
+Integrates Tavily to retrieve relevant web results, including titles, URLs, snippets, and relevance scores.
+
+### 3. Persistent conversation memory
+Stores user messages and assistant responses so the agent can use previous conversation context.
+
+### 4. Conversation management
+Supports creating conversations, listing a user's conversations, and retrieving message history.
+
+### 5. Authenticated API
+Uses the existing AgentOS authentication and user authorization flow.
+
+### 6. Source-aware responses
+Search results are passed to the LLM so it can provide answers supported by retrieved web sources.
 
 ## Architecture
 
-AgentOS follows a modular architecture that separates the frontend, API, agent runtime, and business tools.
-
 ```text
-AgentOS/
-├── apps/
-│   ├── web/                 # Web application
-│   └── api/                 # Python API backend
-│       └── app/
-│           ├── agent/       # Agent runtime and execution
-│           └── tools/       # Business tools and integrations
-├── README.md
-└── .gitignore
+User
+ |
+ v
+FastAPI Chat API
+ |
+ v
+Authentication & Authorization
+ |
+ v
+Chat Service
+ |
+ +------> Conversation History (Database)
+ |
+ v
+Chat Agent Runtime
+ |
+ v
+Groq LLM
+ |
+ +------> Tavily Web Search (when needed)
+ |
+ v
+Final Answer + Sources
+ |
+ v
+Save Assistant Response
+ |
+ v
+Return Response to User
 ```
-
-The structure above illustrates the main application areas. Refer to the actual repository for the complete directory structure.
-
-### How It Works
-
-1. **User Request:** The user submits a task through the web interface or API.
-2. **Request Processing:** The backend validates and processes the request.
-3. **Agent Execution:** The agent runtime determines how the task should be handled.
-4. **Tool Invocation:** The agent uses an appropriate configured tool when available.
-5. **Response:** The backend returns the result to the user.
 
 ## Tech Stack
 
 | Component | Technology |
 |---|---|
 | Backend | Python |
-| API framework | FastAPI, if enabled in the current backend |
-| Agent system | Modular Python agent runtime |
-| Frontend | Application under `apps/web` |
-| Integrations | Configurable business tools and external APIs |
-| Configuration | Environment variables |
+| API Framework | FastAPI |
+| LLM Provider | Groq |
+| Web Search | Tavily |
+| LLM Client | OpenAI-compatible Python client |
+| Database | SQLAlchemy async database |
+| Migrations | Alembic |
+| Cache / Supporting Service | Redis |
+| Authentication | Existing AgentOS authentication |
 
-The exact frontend framework, database, and AI provider depend on the current implementation.
+## Project Structure
+
+```text
+agentos/
+├── apps/
+│   └── api/
+│       ├── app/
+│       │   ├── agent/
+│       │   │   └── chat_runtime.py
+│       │   ├── api/
+│       │   │   └── chat.py
+│       │   ├── models/
+│       │   │   ├── conversation.py
+│       │   │   └── chat_message.py
+│       │   ├── schemas/
+│       │   │   └── chat.py
+│       │   ├── services/
+│       │   │   └── chat.py
+│       │   ├── tools/
+│       │   │   └── web_search.py
+│       │   ├── config.py
+│       │   └── main.py
+│       ├── alembic/
+│       └── requirements.txt
+├── design.md
+└── README.md
+```
 
 ## Getting Started
 
 ### Prerequisites
 
-Install the following before running the project:
+- Python 3.11+
+- Redis
+- A supported database configured for the existing AgentOS backend
+- Groq API key
+- Tavily API key
 
-- Python 3.11 or another version supported by the project dependencies
-- Node.js and npm, if running the web application
-- Git
-- API credentials for any external AI providers or services you enable
+### 1. Clone the repository
 
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/Kundank8789/ai-agentOs.git
-cd ai-agentOs
+```powershell
+git clone https://github.com/Kundank8789/agentos-web-search-chat.git
+cd agentos-web-search-chat
 ```
 
-### 2. Set Up the Backend
-
-Open a terminal in the API directory:
+### 2. Create and activate the virtual environment
 
 ```powershell
 cd apps/api
-```
-
-Create a virtual environment:
-
-```powershell
 py -m venv .venv
-```
-
-Activate it:
-
-```powershell
 .\.venv\Scripts\Activate.ps1
 ```
 
-Install dependencies:
+### 3. Install dependencies
 
 ```powershell
 pip install -r requirements.txt
 ```
 
-If your project uses a different dependency file or package manager, follow the configuration included in `apps/api`.
+### 4. Configure environment variables
 
-### 3. Configure Environment Variables
+Create the environment file in the location expected by the backend configuration.
 
-Create a `.env` file in the directory expected by the backend configuration.
+Configure your Groq and Tavily credentials, database connection, Redis connection, and existing AgentOS authentication settings.
 
-Example:
+Example values:
 
 ```env
-# AI provider
-MISTRAL_API_KEY=your_mistral_api_key
-
-# Add other variables required by your implementation
-# DATABASE_URL=
-# GMAIL_CLIENT_ID=
-# GMAIL_CLIENT_SECRET=
-# CRM_API_KEY=
+GROQ_API_KEY=your_groq_api_key
+TAVILY_API_KEY=your_tavily_api_key
+REDIS_URL=redis://localhost:6379/0
 ```
 
-Only add variables that your implementation actually supports. Use the provider and variable names expected by your configuration files.
+Add the database and authentication variables required by your existing AgentOS configuration.
 
-**Security:** Never commit `.env` files, API keys, OAuth secrets, or other credentials to GitHub.
+**Important:** Never commit API keys, passwords, JWT secrets, or `.env` files.
 
-### 4. Start the Backend
+### 5. Start Redis
 
-Run the FastAPI application using its actual Python module path. For example, if the entry point is `app.main`:
+Make sure Redis is running before starting the backend.
+
+Verify the connection:
 
 ```powershell
-uvicorn app.main:app --reload
+Test-NetConnection localhost -Port 6379
 ```
 
-If your entry point is different, replace `app.main:app` with the correct import path.
+If Redis is installed in WSL, start it from Ubuntu:
 
-When the server starts successfully, open the API documentation at:
+```bash
+sudo service redis-server start
+redis-cli ping
+```
+
+Expected response:
+
+```text
+PONG
+```
+
+### 6. Run database migrations
+
+From the API directory, run:
+
+```powershell
+alembic upgrade head
+```
+
+### 7. Start the backend
+
+```powershell
+python -m uvicorn app.main:app --reload
+```
+
+Backend URL:
+
+```text
+http://127.0.0.1:8000
+```
+
+Interactive API documentation:
 
 ```text
 http://127.0.0.1:8000/docs
 ```
 
-This URL is available when FastAPI's interactive documentation is enabled.
+## API Endpoints
 
-### 5. Start the Frontend
+The chat API uses the existing AgentOS authentication flow.
 
-Open a second terminal:
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/chat/message` | Send a message and receive an AI response |
+| GET | `/chat/conversations` | List the authenticated user's conversations |
+| GET | `/chat/conversations/{conversation_id}/messages` | Retrieve conversation messages |
 
-```powershell
-cd apps/web
-npm install
-npm run dev
+### Example request
+
+`POST /chat/message`
+
+```json
+{
+  "message": "What are the latest developments in AI agents?"
+}
 ```
 
-Open the local URL displayed by your frontend development server.
+A follow-up request can include the existing conversation ID:
 
-These commands assume that `apps/web` contains a Node.js application with the corresponding npm scripts.
+```json
+{
+  "message": "Summarize the first result.",
+  "conversation_id": "YOUR_CONVERSATION_ID"
+}
+```
 
-## Example Use Cases
+Requests must include valid authentication according to the existing AgentOS API.
 
-AgentOS is intended to support business automation use cases such as:
+The response includes the assistant's answer, conversation information, and available web sources.
 
-- **Customer management:** Organize customer information and streamline lead workflows.
-- **Email assistance:** Help process business emails through configured integrations.
-- **Task automation:** Reduce repetitive work by executing supported operations through tools.
-- **Workflow orchestration:** Connect multiple business actions into a single workflow.
-- **Extensible business operations:** Add new tools for the specific needs of a business.
+## Conversation Memory
 
-These are project goals and potential use cases; they should not be interpreted as a claim that every workflow is already implemented.
+Conversation messages are persisted in the database.
 
-## Project Goals
+This allows the agent to:
 
-The long-term vision for AgentOS is to build an AI employee platform tailored to the needs of Indian businesses, with a focus on practical automation, extensibility, and usability.
+1. Retrieve previous messages from a conversation.
+2. Use recent conversation history when generating a response.
+3. Remember what the user asked earlier.
+4. Associate messages with their conversation and authenticated user.
 
-Potential areas of expansion include:
+For example:
 
-- WhatsApp-based customer and lead management
-- AI-assisted sales follow-ups
-- Automated task creation and reminders
-- Business reporting and summaries
-- Human approval for sensitive actions
-- Integrations with commonly used business applications
-- Multi-agent workflows for complex operations
+**User:** What are the latest developments in AI agents in 2026?
 
-## Development Roadmap
+**User:** What topic did I ask about in my first message?
 
-- [x] Establish the initial repository and application structure
-- [x] Begin developing the Python API and agent tooling
-- [ ] Stabilize the agent runtime and tool execution
-- [ ] Complete the web application integration
-- [ ] Add reliable authentication and authorization
-- [ ] Expand CRM and email integrations
-- [ ] Add workflow logging, error handling, and observability
-- [ ] Implement human approval for sensitive operations
-- [ ] Add automated tests and deployment documentation
+**Agent:** You asked about the latest developments in AI agents in 2026.
 
-Update the checklist as individual milestones are completed.
+## Testing
 
-## Contributing
+Run the backend test suite from the API directory:
 
-Contributions, ideas, bug reports, and feature suggestions are welcome.
+```powershell
+python -m pytest -q
+```
 
-1. Fork the repository.
-2. Create a feature branch.
+The existing backend test suite passed **22 tests** during development.
 
-   ```bash
-   git checkout -b feature/your-feature
-   ```
+## Design Documentation
 
-3. Make your changes and test them.
-4. Commit your changes.
+See [`design.md`](./design.md) for the design decisions, architecture, implementation approach, and potential future improvements.
 
-   ```bash
-   git add .
-   git commit -m "Add your feature"
-   ```
+## Security Considerations
 
-5. Push your branch and open a pull request.
+- Keep API credentials in environment variables.
+- Never expose authentication tokens or API keys.
+- Enforce conversation ownership and user authorization.
+- Validate incoming API requests.
+- Handle external API failures safely.
 
-Please avoid including credentials, local environment files, or generated secrets in commits.
+## Future Improvements
 
-## Security
-
-- Store credentials in environment variables.
-- Follow the principle of least privilege when connecting external services.
-- Validate tool inputs and API requests.
-- Require appropriate authorization before executing sensitive actions.
-- Do not expose development servers or administrative endpoints publicly without suitable security controls.
-
-## License
-
-No license is specified here. Add a `LICENSE` file to the repository if you intend to distribute the project under an open-source license.
+- Streaming responses.
+- Better retry and timeout handling.
+- Improved source citation formatting.
+- Dedicated automated tests for chat workflows.
+- Conversation summarization for longer histories.
+- More robust monitoring and observability.
 
 ## Author
 
 **Kundan Kumar**
 
-- GitHub: [@Kundank8789](https://github.com/Kundank8789)
-- Project Repository: [ai-agentOs](https://github.com/Kundank8789/ai-agentOs)
+GitHub: https://github.com/Kundank8789
 
 ---
 
-*Building toward a future where every business can benefit from an AI employee.*
+Built as an extension of AgentOS to explore practical AI agents with web search and persistent conversational memory.
